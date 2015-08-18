@@ -18,6 +18,46 @@ class GraphicsContext;
 namespace detail {
 
 /*
+ * Named Vertex buffer
+ * Type Name, Type, Name, ...
+ * TODO:
+ *  * NamedType constructor:
+ *    1) Function using variadic templates with a type constructor
+ *       Vertex<vec4, name("position"), vec3, name("normal"), vec2("texcoords")>
+ *    2) Macro:
+ *       Vertex(vec4, position, vec3 normal, vec2 texcoords) expands to vertex type
+ *  * CreateVAO function which uses attribute names
+ *
+ *  Another solution:
+ *  struct Vertex {
+ *    ATTRIB(vec4, "position") position;
+ *    ATTRIB(vec3, "normal") normal;
+ *    ATTRIB(vec2, "texcoord") texcoord;
+ *  };
+ */
+template <size_t I, class... Types>
+struct NamedVertexConsCell;
+
+template <size_t I, class T, class NameT, class... Types>
+struct NamedVertexConsCell<I, T, NameT, Types...> {
+	using HeadType = T;
+	using TailType = NamedVertexConsCell<I+1, Types...>;
+	using NameType = NameT;
+
+	HeadType head;
+	TailType tail;
+};
+
+template <size_t I, class T, class NameT>
+struct NamedVertexConsCell<I, T, NameT> {
+	using HeadType = T;
+	using TailType = detail::EmptyListType;
+	using NameType = NameT;
+
+	HeadType head;
+};
+
+/*
  * Setup vertex attribute pointers for a cons-list of types
  */
 template <size_t I, class ConsCell>
@@ -93,7 +133,13 @@ public:
 	}
 };
 
+
 }
+
+template <size_t I, class... Types>
+struct IsGfxTuple<detail::NamedVertexConsCell<I, Types...>> {
+	static const constexpr bool value = true;
+};
 
 template <class Vertex>
 class GeometryBuffer: public detail::Geometry {

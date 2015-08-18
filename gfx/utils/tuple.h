@@ -305,7 +305,6 @@ public:
  * Similar to TypeList but holds values which can be accessed/mutated at runtime
  * TODO: Proper layout parameters
  * TODO: Rvalue reference get()
- * TODO: Iterators
  */
 template <class... Types>
 using Tuple = detail::Tuple<detail::ValueConsCell, Types...>;
